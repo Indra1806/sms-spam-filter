@@ -3,870 +3,310 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMS Spam Filter - AI-Powered Detection</title>
-    <meta name="description" content="Detect SMS spam messages using advanced AI technology. Free, fast, and accurate spam detection.">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚫</text></svg>">
-    
+    <title>SMS Spam Filter</title>
     <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            --shadow-light: 0 10px 40px rgba(0, 0, 0, 0.1);
-            --shadow-medium: 0 15px 35px rgba(0, 0, 0, 0.15);
-            --shadow-heavy: 0 25px 50px rgba(0, 0, 0, 0.2);
-            --border-radius: 16px;
-            --border-radius-lg: 24px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: var(--primary-gradient);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
-            line-height: 1.6;
-            position: relative;
         }
-
-        /* Animated background */
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
-            animation: backgroundShift 20s ease-in-out infinite;
-            z-index: -1;
-        }
-
-        @keyframes backgroundShift {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-        }
-
+        
         .container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: var(--border-radius-lg);
-            box-shadow: var(--shadow-heavy);
-            padding: 48px 40px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
             width: 100%;
-            max-width: 700px;
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--primary-gradient);
-            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
-        }
-
-        .header {
+            max-width: 600px;
             text-align: center;
-            margin-bottom: 40px;
         }
-
-        .header h1 {
-            font-size: clamp(2rem, 4vw, 2.8rem);
-            font-weight: 700;
-            margin-bottom: 12px;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: -0.02em;
-        }
-
-        .header .subtitle {
-            color: #6b7280;
-            font-size: 1.125rem;
-            font-weight: 400;
-            margin-bottom: 8px;
-        }
-
-        .header .description {
-            color: #9ca3af;
-            font-size: 0.95rem;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        .form-container {
-            margin-bottom: 32px;
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-label {
-            display: block;
+        
+        .title {
+            color: #333;
+            font-size: 2.5rem;
             margin-bottom: 10px;
-            font-weight: 600;
-            color: #374151;
-            font-size: 0.95rem;
+            font-weight: 700;
         }
-
-        .form-textarea {
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        textarea {
             width: 100%;
-            padding: 18px 20px;
-            border: 2px solid #e5e7eb;
-            border-radius: var(--border-radius);
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
             font-size: 16px;
-            font-family: inherit;
             resize: vertical;
-            min-height: 140px;
-            transition: var(--transition);
-            background: #fafbfc;
-            line-height: 1.5;
+            min-height: 120px;
+            transition: border-color 0.3s ease;
         }
-
-        .form-textarea:focus {
+        
+        textarea:focus {
             outline: none;
             border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            background: #ffffff;
         }
-
-        .form-textarea::placeholder {
-            color: #9ca3af;
-            font-style: italic;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 32px;
-            flex-wrap: wrap;
-        }
-
+        
         .btn {
-            flex: 1;
-            min-width: 140px;
-            padding: 16px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             border: none;
-            border-radius: var(--border-radius);
-            font-size: 16px;
-            font-weight: 600;
+            padding: 15px 40px;
+            font-size: 18px;
+            border-radius: 50px;
             cursor: pointer;
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-            text-transform: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            transition: transform 0.2s ease;
+            font-weight: 600;
         }
-
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
         .btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
-            transform: none !important;
+            transform: none;
         }
-
-        .btn-primary {
-            background: var(--primary-gradient);
-            color: white;
-            box-shadow: var(--shadow-light);
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            display: none;
         }
-
-        .btn-primary:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-medium);
+        
+        .result.spam {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 2px solid #ffcdd2;
         }
-
-        .btn-primary:active:not(:disabled) {
-            transform: translateY(0);
+        
+        .result.ham {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+            border: 2px solid #a5d6a7;
         }
-
-        .btn-secondary {
-            background: #f9fafb;
-            color: #374151;
-            border: 2px solid #e5e7eb;
-            box-shadow: none;
+        
+        .result.error {
+            background-color: #fff3e0;
+            color: #ef6c00;
+            border: 2px solid #ffcc02;
         }
-
-        .btn-secondary:hover:not(:disabled) {
-            background: #f3f4f6;
-            border-color: #d1d5db;
-            transform: translateY(-1px);
+        
+        .confidence {
+            margin-top: 10px;
+            font-size: 14px;
+            opacity: 0.8;
         }
-
-        /* Loading animation */
-        .loading-spinner {
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top: 2px solid #ffffff;
+        
+        .loading {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
             border-radius: 50%;
+            width: 30px;
+            height: 30px;
             animation: spin 1s linear infinite;
+            margin: 0 auto;
         }
-
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        /* Results section */
-        .result-container {
-            margin-top: 32px;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: var(--transition);
-            pointer-events: none;
+        
+        .examples {
+            margin-top: 30px;
+            text-align: left;
         }
-
-        .result-container.show {
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: auto;
-        }
-
-        .result-card {
-            padding: 24px;
-            border-radius: var(--border-radius);
-            color: white;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .result-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .result-card.animate::before {
-            left: 100%;
-        }
-
-        .result-spam {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
-        }
-
-        .result-ham {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
-        }
-
-        .result-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .result-icon {
-            font-size: 2rem;
-            opacity: 0;
-            animation: iconPop 0.5s ease-out 0.3s forwards;
-        }
-
-        @keyframes iconPop {
-            0% { transform: scale(0); opacity: 0; }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        .result-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .result-description {
-            font-size: 1rem;
-            opacity: 0.95;
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
-
-        .confidence-section {
-            margin-top: 20px;
-        }
-
-        .confidence-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-            margin-bottom: 8px;
-        }
-
-        .confidence-bar {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            height: 10px;
-            overflow: hidden;
-            margin-bottom: 8px;
-        }
-
-        .confidence-fill {
-            height: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            transition: width 1s ease-out;
-            width: 0%;
-        }
-
-        .confidence-text {
-            font-size: 0.9rem;
-            font-weight: 600;
+        
+        .examples h3 {
+            color: #333;
+            margin-bottom: 15px;
             text-align: center;
         }
-
-        /* Error handling */
-        .error-container {
-            margin-top: 20px;
-            padding: 16px 20px;
-            background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
-            color: white;
-            border-radius: var(--border-radius);
-            display: none;
-            align-items: center;
-            gap: 12px;
-            box-shadow: var(--shadow-light);
-        }
-
-        .error-container.show {
-            display: flex;
-        }
-
-        .error-icon {
-            font-size: 1.2rem;
-        }
-
-        /* Examples section */
-        .examples-section {
-            margin-top: 40px;
-            padding-top: 32px;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        .examples-title {
-            color: #374151;
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .examples-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 12px;
-        }
-
-        .example-item {
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: var(--border-radius);
-            padding: 16px;
+        
+        .example {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
             cursor: pointer;
-            transition: var(--transition);
-            position: relative;
+            transition: background-color 0.2s ease;
         }
-
-        .example-item:hover {
-            background: #f3f4f6;
-            border-color: #d1d5db;
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-light);
+        
+        .example:hover {
+            background: #e9ecef;
         }
-
-        .example-type {
+        
+        .example-label {
             font-weight: 600;
-            font-size: 0.85rem;
+            color: #667eea;
+            font-size: 12px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-
-        .example-spam .example-type {
-            color: #dc2626;
-        }
-
-        .example-ham .example-type {
-            color: #059669;
-        }
-
-        .example-text {
-            color: #4b5563;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-
-        /* Character counter */
-        .char-counter {
-            text-align: right;
-            font-size: 0.8rem;
-            color: #9ca3af;
-            margin-top: 4px;
-        }
-
-        .char-counter.warning {
-            color: #f59e0b;
-        }
-
-        .char-counter.danger {
-            color: #ef4444;
-        }
-
-        /* Responsive design */
-        @media (max-width: 768px) {
-            .container {
-                padding: 32px 24px;
-                margin: 10px;
-            }
-            
-            .button-group {
-                flex-direction: column;
-            }
-            
-            .btn {
-                min-width: unset;
-            }
-            
-            .examples-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 24px 20px;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-        }
-
-        /* Accessibility improvements */
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
-        }
-
-        /* Focus styles */
-        .btn:focus-visible,
-        .form-textarea:focus-visible,
-        .example-item:focus-visible {
-            outline: 2px solid #667eea;
-            outline-offset: 2px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header class="header">
-            <h1>🚫 SMS Spam Filter</h1>
-            <p class="subtitle">AI-Powered Spam Detection</p>
-            <p class="description">
-                Advanced machine learning technology to detect spam messages with high accuracy and confidence
-            </p>
-        </header>
-
-        <main class="form-container">
-            <form id="spamForm" aria-label="SMS spam detection form">
-                <div class="form-group">
-                    <label for="message" class="form-label">
-                        Enter SMS Message
-                    </label>
-                    <textarea 
-                        id="message" 
-                        name="message" 
-                        class="form-textarea"
-                        placeholder="Type or paste your SMS message here to analyze if it's spam or legitimate..."
-                        required
-                        aria-describedby="char-counter message-help"
-                        maxlength="1000"
-                    ></textarea>
-                    <div id="char-counter" class="char-counter">0 / 1000 characters</div>
-                    <div id="message-help" class="sr-only">
-                        Enter the SMS message you want to check for spam
-                    </div>
-                </div>
-
-                <div class="button-group">
-                    <button type="submit" class="btn btn-primary" id="analyzeBtn">
-                        <span class="btn-text">🔍 Analyze Message</span>
-                        <div class="loading-spinner" style="display: none;"></div>
-                    </button>
-                    <button type="button" class="btn btn-secondary" onclick="clearForm()" id="clearBtn">
-                        🗑️ Clear
-                    </button>
-                </div>
-            </form>
-
-            <!-- Results Section -->
-            <div class="result-container" id="resultContainer" role="region" aria-label="Analysis results">
-                <div class="result-card" id="resultCard">
-                    <div class="result-header">
-                        <span class="result-icon" id="resultIcon"></span>
-                        <h2 class="result-title" id="resultTitle"></h2>
-                    </div>
-                    <p class="result-description" id="resultDescription"></p>
-                    
-                    <div class="confidence-section">
-                        <div class="confidence-label">Confidence Level</div>
-                        <div class="confidence-bar">
-                            <div class="confidence-fill" id="confidenceFill"></div>
-                        </div>
-                        <div class="confidence-text" id="confidenceText"></div>
-                    </div>
-                </div>
+        <h1 class="title">📱 SMS Spam Filter</h1>
+        <p class="subtitle">Enter an SMS message to check if it's spam or legitimate</p>
+        
+        <div class="input-group">
+            <textarea 
+                id="messageInput" 
+                placeholder="Enter your SMS message here..."
+                maxlength="500"
+            ></textarea>
+        </div>
+        
+        <button class="btn" id="analyzeBtn">🔍 Analyze Message</button>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Analyzing message...</p>
+        </div>
+        
+        <div class="result" id="result"></div>
+        
+        <div class="examples">
+            <h3>Try These Examples:</h3>
+            
+            <div class="example" onclick="setExample('Congratulations! You have won $5000! Click here to claim your prize now!')">
+                <div class="example-label">Likely Spam</div>
+                <div>Congratulations! You have won $5000! Click here to claim your prize now!</div>
             </div>
-
-            <!-- Error Section -->
-            <div class="error-container" id="errorContainer" role="alert">
-                <span class="error-icon">⚠️</span>
-                <span id="errorMessage"></span>
+            
+            <div class="example" onclick="setExample('Hey mom, I will be home late tonight. Don\\'t wait up for dinner.')">
+                <div class="example-label">Legitimate Message</div>
+                <div>Hey mom, I will be home late tonight. Don't wait up for dinner.</div>
             </div>
-        </main>
-
-        <!-- Examples Section -->
-        <section class="examples-section">
-            <h3 class="examples-title">Try These Examples</h3>
-            <div class="examples-grid">
-                <div class="example-item example-spam" onclick="setExample(this)" 
-                     data-message="🎉 CONGRATULATIONS! You've WON a $1000 Walmart gift card! Click here NOW to claim your prize before it expires! Limited time offer!"
-                     role="button" tabindex="0" aria-label="Try spam example">
-                    <div class="example-type">Spam Example</div>
-                    <div class="example-text">CONGRATULATIONS! You've WON a $1000 gift card...</div>
-                </div>
-
-                <div class="example-item example-ham" onclick="setExample(this)"
-                     data-message="Hey! Are we still on for lunch tomorrow at 1pm? Let me know if you need to reschedule."
-                     role="button" tabindex="0" aria-label="Try legitimate example">
-                    <div class="example-type">Legitimate Example</div>
-                    <div class="example-text">Hey! Are we still on for lunch tomorrow at 1pm?...</div>
-                </div>
-
-                <div class="example-item example-spam" onclick="setExample(this)"
-                     data-message="URGENT ALERT: Your bank account will be suspended! Call 555-FAKE immediately to verify your identity and prevent account closure!"
-                     role="button" tabindex="0" aria-label="Try urgent spam example">
-                    <div class="example-type">Spam Example</div>
-                    <div class="example-text">URGENT ALERT: Your bank account will be suspended...</div>
-                </div>
-
-                <div class="example-item example-ham" onclick="setExample(this)"
-                     data-message="Thanks for helping me move today! I really appreciate it. Pizza and drinks are on me next weekend!"
-                     role="button" tabindex="0" aria-label="Try thank you example">
-                    <div class="example-type">Legitimate Example</div>
-                    <div class="example-text">Thanks for helping me move today! I really appreciate it...</div>
-                </div>
+            
+            <div class="example" onclick="setExample('URGENT! Your bank account will be suspended. Verify your details immediately at www.fake-bank.com')">
+                <div class="example-label">Likely Spam</div>
+                <div>URGENT! Your bank account will be suspended. Verify your details immediately at www.fake-bank.com</div>
             </div>
-        </section>
+            
+            <div class="example" onclick="setExample('Meeting rescheduled to 3pm tomorrow. Conference room B.')">
+                <div class="example-label">Legitimate Message</div>
+                <div>Meeting rescheduled to 3pm tomorrow. Conference room B.</div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Global variables
-        let isAnalyzing = false;
+        const messageInput = document.getElementById('messageInput');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const result = document.getElementById('result');
+        const loading = document.getElementById('loading');
 
-        // DOM elements
-        const elements = {
-            form: document.getElementById('spamForm'),
-            message: document.getElementById('message'),
-            analyzeBtn: document.getElementById('analyzeBtn'),
-            clearBtn: document.getElementById('clearBtn'),
-            btnText: document.querySelector('.btn-text'),
-            loadingSpinner: document.querySelector('.loading-spinner'),
-            charCounter: document.getElementById('char-counter'),
-            resultContainer: document.getElementById('resultContainer'),
-            resultCard: document.getElementById('resultCard'),
-            resultIcon: document.getElementById('resultIcon'),
-            resultTitle: document.getElementById('resultTitle'),
-            resultDescription: document.getElementById('resultDescription'),
-            confidenceFill: document.getElementById('confidenceFill'),
-            confidenceText: document.getElementById('confidenceText'),
-            errorContainer: document.getElementById('errorContainer'),
-            errorMessage: document.getElementById('errorMessage')
-        };
-
-        // Initialize the app
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeApp();
-        });
-
-        function initializeApp() {
-            // Character counter
-            elements.message.addEventListener('input', updateCharCounter);
-            
-            // Form submission
-            elements.form.addEventListener('submit', handleFormSubmit);
-            
-            // Keyboard support for examples
-            document.querySelectorAll('.example-item').forEach(item => {
-                item.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        setExample(this);
-                    }
-                });
-            });
-
-            // Auto-focus on message input
-            elements.message.focus();
+        function setExample(text) {
+            messageInput.value = text;
+            messageInput.focus();
         }
 
-        function updateCharCounter() {
-            const length = elements.message.value.length;
-            const maxLength = 1000;
-            elements.charCounter.textContent = `${length} / ${maxLength} characters`;
+        function showLoading() {
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            analyzeBtn.disabled = true;
+        }
+
+        function hideLoading() {
+            loading.style.display = 'none';
+            analyzeBtn.disabled = false;
+        }
+
+        function showResult(data) {
+            result.style.display = 'block';
             
-            // Update styling based on character count
-            elements.charCounter.className = 'char-counter';
-            if (length > maxLength * 0.9) {
-                elements.charCounter.classList.add('danger');
-            } else if (length > maxLength * 0.75) {
-                elements.charCounter.classList.add('warning');
+            if (data.success) {
+                if (data.is_spam) {
+                    result.className = 'result spam';
+                    result.innerHTML = `
+                        <div>🚨 <strong>SPAM DETECTED</strong></div>
+                        <div class="confidence">Confidence: ${(data.confidence * 100).toFixed(1)}%</div>
+                        <div class="confidence">Spam probability: ${(data.probabilities.spam * 100).toFixed(1)}%</div>
+                    `;
+                } else {
+                    result.className = 'result ham';
+                    result.innerHTML = `
+                        <div>✅ <strong>LEGITIMATE MESSAGE</strong></div>
+                        <div class="confidence">Confidence: ${(data.confidence * 100).toFixed(1)}%</div>
+                        <div class="confidence">Ham probability: ${(data.probabilities.ham * 100).toFixed(1)}%</div>
+                    `;
+                }
+            } else {
+                result.className = 'result error';
+                result.innerHTML = `
+                    <div>⚠️ <strong>ERROR</strong></div>
+                    <div class="confidence">${data.error || 'Failed to analyze the message. Please try again.'}</div>
+                `;
             }
         }
 
-        async function handleFormSubmit(e) {
-            e.preventDefault();
-            
-            const message = elements.message.value.trim();
+        analyzeBtn.addEventListener('click', async () => {
+            const message = messageInput.value.trim();
             
             if (!message) {
-                showError('Please enter a message to analyze.');
+                alert('Please enter a message to analyze.');
                 return;
             }
-
-            if (message.length > 1000) {
-                showError('Message is too long. Please keep it under 1000 characters.');
-                return;
-            }
-
-            if (isAnalyzing) return;
-
-            try {
-                await analyzeMessage(message);
-            } catch (error) {
-                console.error('Analysis error:', error);
-                showError('An unexpected error occurred. Please try again.');
-            }
-        }
-
-        async function analyzeMessage(message) {
-            setLoadingState(true);
-            hideError();
-            hideResult();
-
+            
+            showLoading();
+            
             try {
                 const response = await fetch('/predict', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ message: message }),
-                    signal: AbortSignal.timeout(10000) // 10 second timeout
+                    body: JSON.stringify({ message: message })
                 });
-
-                if (!response.ok) {
-                    throw new Error(`Server error: ${response.status}`);
-                }
-
+                
                 const data = await response.json();
-
-                if (data.status === 'success') {
-                    showResult(data);
-                } else {
-                    showError(data.error || 'Failed to analyze the message.');
-                }
+                showResult(data);
+                
             } catch (error) {
-                if (error.name === 'TimeoutError') {
-                    showError('Request timed out. Please try again.');
-                } else if (error.name === 'TypeError') {
-                    showError('Network error. Please check your connection.');
-                } else {
-                    showError('Failed to analyze the message. Please try again.');
-                }
-                console.error('Fetch error:', error);
-            } finally {
-                setLoadingState(false);
-            }
-        }
-
-        function showResult(data) {
-            const isSpam = data.prediction === 'spam';
-            const confidence = Math.round((data.confidence || 0) * 100);
-            
-            // Set content
-            elements.resultIcon.textContent = isSpam ? '🚨' : '✅';
-            elements.resultTitle.textContent = isSpam ? 'SPAM DETECTED' : 'LEGITIMATE MESSAGE';
-            
-            elements.resultDescription.textContent = isSpam 
-                ? 'This message appears to be spam. Exercise caution and avoid clicking any links or providing personal information.'
-                : 'This message appears to be legitimate and safe.';
-
-            // Set confidence
-            elements.confidenceText.textContent = `${confidence}% Confident`;
-            
-            // Apply styling
-            elements.resultCard.className = `result-card ${isSpam ? 'result-spam' : 'result-ham'}`;
-            
-            // Show result with animation
-            elements.resultContainer.classList.add('show');
-            
-            // Animate confidence bar
-            setTimeout(() => {
-                elements.confidenceFill.style.width = `${confidence}%`;
-            }, 300);
-
-            // Add shimmer effect
-            setTimeout(() => {
-                elements.resultCard.classList.add('animate');
-            }, 100);
-
-            // Scroll to result
-            setTimeout(() => {
-                elements.resultContainer.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'nearest' 
+                console.error('Error:', error);
+                showResult({
+                    success: false,
+                    error: 'Network error. Please check your connection and try again.'
                 });
-            }, 200);
-
-            // Announce result to screen readers
-            const announcement = `Analysis complete. ${elements.resultTitle.textContent}. ${elements.resultDescription.textContent}. Confidence: ${confidence} percent.`;
-            announceToScreenReader(announcement);
-        }
-
-        function showError(message) {
-            elements.errorMessage.textContent = message;
-            elements.errorContainer.classList.add('show');
-            
-            // Auto-hide error after 5 seconds
-            setTimeout(() => {
-                hideError();
-            }, 5000);
-
-            // Announce error to screen readers
-            announceToScreenReader(`Error: ${message}`);
-        }
-
-        function hideError() {
-            elements.errorContainer.classList.remove('show');
-        }
-
-        function hideResult() {
-            elements.resultContainer.classList.remove('show');
-            elements.resultCard.classList.remove('animate');
-        }
-
-        function setLoadingState(loading) {
-            isAnalyzing = loading;
-            elements.analyzeBtn.disabled = loading;
-            elements.clearBtn.disabled = loading;
-            
-            if (loading) {
-                elements.btnText.style.display = 'none';
-                elements.loadingSpinner.style.display = 'block';
-                elements.analyzeBtn.setAttribute('aria-label', 'Analyzing message, please wait');
-            } else {
-                elements.btnText.style.display = 'flex';
-                elements.loadingSpinner.style.display = 'none';
-                elements.analyzeBtn.setAttribute('aria-label', 'Analyze message');
+            } finally {
+                hideLoading();
             }
-        }
+        });
 
-        function clearForm() {
-            elements.message.value = '';
-            hideResult();
-            hideError();
-            updateCharCounter();
-            elements.message.focus();
-            
-            announceToScreenReader('Form cleared');
-        }
-
-        function setExample(element) {
-            const message = element.getAttribute('data-message');
-            elements.message.value = message;
-            updateCharCounter();
-            hideResult();
-            hideError();
-            
-            // Focus on message textarea
-            elements.message.focus();
-            elements.message.setSelectionRange(message.length, message.length);
-            
-            announceToScreenReader('Example message loaded');
-        }
-
-        function announceToScreenReader(message) {
-            const announcement = document.createElement('div');
-            announcement.setAttribute('aria-live', 'polite');
-            announcement.setAttribute('aria-atomic', 'true');
-            announcement.className = 'sr-only';
-            announcement.textContent = message;
-            
-            document.body.appendChild(announcement);
-            
-            setTimeout(() => {
-                document.body.removeChild(announcement);
-            }, 1000);
-        }
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            // Ctrl/Cmd + Enter to submit form
-            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !isAnalyzing) {
+        // Allow Enter key to submit (Ctrl+Enter for new line)
+        messageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.ctrlKey) {
                 e.preventDefault();
-                elements.form.dispatchEvent(new Event('submit'));
+                analyzeBtn.click();
             }
-            
-            // Escape to clear form
-            if (e.key === 'Escape') {
-                clearForm();
-            }
-        });
-
-        // Handle online/offline status
-        window.addEventListener('online', function() {
-            hideError();
-        });
-
-        window.addEventListener('offline', function() {
-            showError('You are offline. Please check your internet connection.');
         });
     </script>
 </body>
