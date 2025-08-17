@@ -236,13 +236,9 @@ def main():
     
     # Initialize the spam filter
     if 'spam_filter' not in st.session_state:
-        st.session_state.spam_filter = SMSSpamFilter()
-        
-        # Try to load existing models
-        if not st.session_state.spam_filter.load_models():
-            with st.spinner("Training models... This may take a moment."):
-                st.session_state.spam_filter.train_models()
-    
+        st.session_state.spam_filter = None  # or your default model
+
+    # Now you can safely access st.session_state["spam_filter"]
     spam_filter = st.session_state.spam_filter
     
     # Sidebar
