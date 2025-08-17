@@ -3,7 +3,6 @@ version: '3.8'
 services:
   spam-filter:
     build: .
-    container_name: sms-spam-filter
     ports:
       - "5000:5000"
     volumes:
@@ -14,11 +13,3 @@ services:
       - FLASK_ENV=production
       - PYTHONPATH=/app/src
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
-      interval: 30s
-      timeout: 30s
-      retries: 3
-
-volumes:
-  - ./nginx:/etc/nginx
