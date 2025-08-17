@@ -21,7 +21,7 @@ A sophisticated machine learning-powered SMS spam detection system with an intui
 
 ## 🚀 Live Demo
 
-![SMS Spam Filter Demo](https://via.placeholder.com/800x400/0066cc/ffffff?text=SMS+Spam+Filter+Demo)
+![SMS Spam Filter Demo](https://github.com/Indra1806/sms-spam-filter/blob/main/demo/demo_image.png)
 
 ## 📋 Table of Contents
 
