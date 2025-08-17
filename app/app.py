@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, jsonify
 import sys
 import os
 import logging
+import sklearn
 
 # Add src to path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))

@@ -578,24 +578,8 @@ def print_deployment_instructions(model_path, best_model_type, logger):
     print("   - Training logs: logs/training_*.log")
     print("   - Full report: results/training_report_*.md")
 
-def main():
+def main(args):
     """Main training pipeline"""
-    # Parse command line arguments
-    parser = argparse.ArgumentParser(description='SMS Spam Filter Training Pipeline')
-    parser.add_argument('--data-path', default='data/spam.csv', 
-                       help='Path to the SMS dataset CSV file')
-    parser.add_argument('--model-type', default='auto', 
-                       choices=['auto', 'naive_bayes', 'logistic_regression', 'random_forest'],
-                       help='Model type to train (auto selects best)')
-    parser.add_argument('--test-size', type=float, default=0.2,
-                       help='Test set size (default: 0.2)')
-    parser.add_argument('--max-features', type=int, default=5000,
-                       help='Maximum TF-IDF features (default: 5000)')
-    parser.add_argument('--skip-analysis', action='store_true',
-                       help='Skip data analysis and visualization steps')
-    
-    args = parser.parse_args()
-    
     # Setup
     print_banner()
     logger = setup_logging()
@@ -745,35 +729,59 @@ def validate_environment():
     print(f"\n🔍 ENVIRONMENT VALIDATION")
     print("=" * 50)
     
-    required_packages = [
-        'pandas', 'numpy', 'scikit-learn', 'matplotlib', 
-        'seaborn', 'wordcloud', 'nltk'
-    ]
+    # Package mapping: display_name -> actual_import_name
+    required_packages = {
+        'pandas': 'pandas',
+        'numpy': 'numpy', 
+        'scikit-learn': 'sklearn',  # scikit-learn is imported as sklearn
+        'matplotlib': 'matplotlib',
+        'seaborn': 'seaborn',
+        'wordcloud': 'wordcloud',
+        'nltk': 'nltk'
+    }
     
     missing_packages = []
     
-    for package in required_packages:
+    for display_name, import_name in required_packages.items():
         try:
-            __import__(package)
-            print(f"✅ {package}")
+            __import__(import_name)
+            print(f"✅ {display_name}")
         except ImportError:
-            print(f"❌ {package} - MISSING")
-            missing_packages.append(package)
+            print(f"❌ {display_name} - MISSING")
+            missing_packages.append(display_name)
     
     if missing_packages:
         print(f"\n⚠️  Missing packages detected!")
-        print(f"Please install: pip install {' '.join(missing_packages)}")
+        print(f"Please install missing packages:")
+        for pkg in missing_packages:
+            if pkg == 'scikit-learn':
+                print(f"   pip install scikit-learn")
+            else:
+                print(f"   pip install {pkg}")
+        print(f"\nOr install all at once:")
+        print(f"   pip install {' '.join(missing_packages)}")
         return False
     
-    # Check custom modules
+    # Check custom modules (with better error handling)
+    print(f"\n🔍 Checking custom modules...")
     custom_modules = ['data_loader', 'preprocessor', 'model_trainer', 'predictor']
     missing_modules = []
     
     for module in custom_modules:
         try:
+            # Try to import from src directory
+            import importlib.util
+            module_path = os.path.join('src', f'{module}.py')
+            if os.path.exists(module_path):
+                spec = importlib.util.spec_from_file_location(module, module_path)
+                if spec is not None:
+                    print(f"✅ {module}")
+                    continue
+            
+            # Try regular import as fallback
             __import__(module)
             print(f"✅ {module}")
-        except ImportError:
+        except (ImportError, FileNotFoundError, AttributeError):
             print(f"❌ {module} - MISSING")
             missing_modules.append(module)
     
@@ -782,6 +790,7 @@ def validate_environment():
         print(f"Please ensure these files exist in 'src/' directory:")
         for module in missing_modules:
             print(f"   - src/{module}.py")
+        print(f"\nAlternatively, you can run with --skip-validation to bypass this check")
         return False
     
     print(f"\n✅ Environment validation passed!")
@@ -845,11 +854,30 @@ if __name__ == "__main__":
         show_help()
         sys.exit(0)
     
-    # Validate environment
-    if not validate_environment():
+    # Parse arguments first
+    parser = argparse.ArgumentParser(description='SMS Spam Filter Training Pipeline')
+    parser.add_argument('--data-path', default='data/spam.csv', 
+                       help='Path to the SMS dataset CSV file')
+    parser.add_argument('--model-type', default='auto', 
+                       choices=['auto', 'naive_bayes', 'logistic_regression', 'random_forest'],
+                       help='Model type to train (auto selects best)')
+    parser.add_argument('--test-size', type=float, default=0.2,
+                       help='Test set size (default: 0.2)')
+    parser.add_argument('--max-features', type=int, default=5000,
+                       help='Maximum TF-IDF features (default: 5000)')
+    parser.add_argument('--skip-analysis', action='store_true',
+                       help='Skip data analysis and visualization steps')
+    parser.add_argument('--skip-validation', action='store_true',
+                       help='Skip environment validation (use with caution)')
+    
+    args = parser.parse_args()
+    
+    # Validate environment (unless skipped)
+    if not args.skip_validation and not validate_environment():
         print("\n❌ Environment validation failed. Please fix the issues above.")
+        print("Or use --skip-validation to bypass this check (not recommended)")
         sys.exit(1)
     
     # Run main pipeline
-    exit_code = main()
+    exit_code = main(args)
     sys.exit(exit_code)
