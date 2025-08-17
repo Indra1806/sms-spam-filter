@@ -1,313 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMS Spam Filter</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        
-        .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            padding: 40px;
-            width: 100%;
-            max-width: 600px;
-            text-align: center;
-        }
-        
-        .title {
-            color: #333;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-        
-        .subtitle {
-            color: #666;
-            font-size: 1.1rem;
-            margin-bottom: 30px;
-        }
-        
-        .input-group {
-            margin-bottom: 25px;
-        }
-        
-        textarea {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            font-size: 16px;
-            resize: vertical;
-            min-height: 120px;
-            transition: border-color 0.3s ease;
-        }
-        
-        textarea:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 18px;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-            font-weight: 600;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-        
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .result {
-            margin-top: 30px;
-            padding: 20px;
-            border-radius: 15px;
-            font-size: 18px;
-            font-weight: 600;
-            display: none;
-        }
-        
-        .result.spam {
-            background-color: #ffebee;
-            color: #c62828;
-            border: 2px solid #ffcdd2;
-        }
-        
-        .result.ham {
-            background-color: #e8f5e8;
-            color: #2e7d32;
-            border: 2px solid #a5d6a7;
-        }
-        
-        .result.error {
-            background-color: #fff3e0;
-            color: #ef6c00;
-            border: 2px solid #ffcc02;
-        }
-        
-        .confidence {
-            margin-top: 10px;
-            font-size: 14px;
-            opacity: 0.8;
-        }
-        
-        .loading {
-            display: none;
-            margin-top: 20px;
-        }
-        
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .examples {
-            margin-top: 30px;
-            text-align: left;
-        }
-        
-        .examples h3 {
-            color: #333;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-        
-        .example {
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-        
-        .example:hover {
-            background: #e9ecef;
-        }
-        
-        .example-label {
-            font-weight: 600;
-            color: #667eea;
-            font-size: 12px;
-            text-transform: uppercase;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SMS Spam Filter</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="container">
-        <h1 class="title">📱 SMS Spam Filter</h1>
-        <p class="subtitle">Enter an SMS message to check if it's spam or legitimate</p>
-        
-        <div class="input-group">
-            <textarea 
-                id="messageInput" 
-                placeholder="Enter your SMS message here..."
-                maxlength="500"
-            ></textarea>
-        </div>
-        
-        <button class="btn" id="analyzeBtn">🔍 Analyze Message</button>
-        
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Analyzing message...</p>
-        </div>
-        
-        <div class="result" id="result"></div>
-        
-        <div class="examples">
-            <h3>Try These Examples:</h3>
-            
-            <div class="example" onclick="setExample('Congratulations! You have won $5000! Click here to claim your prize now!')">
-                <div class="example-label">Likely Spam</div>
-                <div>Congratulations! You have won $5000! Click here to claim your prize now!</div>
-            </div>
-            
-            <div class="example" onclick="setExample('Hey mom, I will be home late tonight. Don\\'t wait up for dinner.')">
-                <div class="example-label">Legitimate Message</div>
-                <div>Hey mom, I will be home late tonight. Don't wait up for dinner.</div>
-            </div>
-            
-            <div class="example" onclick="setExample('URGENT! Your bank account will be suspended. Verify your details immediately at www.fake-bank.com')">
-                <div class="example-label">Likely Spam</div>
-                <div>URGENT! Your bank account will be suspended. Verify your details immediately at www.fake-bank.com</div>
-            </div>
-    
-            <div class="example" onclick="setExample('Meeting rescheduled to 3pm tomorrow. Conference room B.')">
-                <div class="example-label">Legitimate Message</div>
-                <div>Meeting rescheduled to 3pm tomorrow. Conference room B.</div>
-            </div>
-        </div>
+<body class="min-h-screen flex items-center justify-center bg-gradient-to-tr from-indigo-500 to-purple-600 p-4">
+  <div class="w-full max-w-2xl bg-white rounded-2xl shadow-2xl p-8">
+    <header class="text-center mb-6">
+      <h1 class="text-3xl font-bold text-gray-800">📱 SMS Spam Filter</h1>
+      <p class="text-gray-600 mt-2">Enter an SMS message to check if it's spam or legitimate</p>
+    </header>
+
+    <!-- Input -->
+    <div class="mb-6">
+      <textarea id="messageInput" maxlength="500" placeholder="Enter your SMS message here..."
+        class="w-full border-2 border-gray-200 rounded-xl p-4 text-gray-700 focus:ring-2 focus:ring-indigo-400 focus:outline-none min-h-[120px]"></textarea>
     </div>
 
-    <script>
-        const messageInput = document.getElementById('messageInput');
-        const analyzeBtn = document.getElementById('analyzeBtn');
-        const result = document.getElementById('result');
-        const loading = document.getElementById('loading');
+    <!-- Button -->
+    <div class="flex justify-center">
+      <button id="analyzeBtn"
+        class="bg-gradient-to-tr from-indigo-500 to-purple-600 text-white font-semibold py-3 px-8 rounded-full shadow-md hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed">
+        🔍 Analyze Message
+      </button>
+    </div>
 
-        function setExample(text) {
-            messageInput.value = text;
-            messageInput.focus();
+    <!-- Loading -->
+    <div id="loading" class="hidden text-center mt-6">
+      <div class="w-8 h-8 border-4 border-gray-200 border-t-indigo-500 rounded-full animate-spin mx-auto"></div>
+      <p class="text-gray-600 mt-2">Analyzing message...</p>
+    </div>
+
+    <!-- Result -->
+    <div id="result" class="hidden mt-6 p-4 rounded-xl font-semibold text-center"></div>
+
+    <!-- Examples -->
+    <section class="mt-8">
+      <h3 class="text-lg font-bold text-gray-700 text-center mb-4">Try These Examples:</h3>
+      <div class="space-y-3">
+        <div class="example cursor-pointer p-4 bg-gray-50 hover:bg-gray-100 rounded-lg" 
+             onclick="setExample('Congratulations! You have won $5000! Click here to claim your prize now!')">
+          <span class="block text-xs font-bold uppercase text-indigo-500 mb-1">Likely Spam</span>
+          Congratulations! You have won $5000! Click here to claim your prize now!
+        </div>
+        <div class="example cursor-pointer p-4 bg-gray-50 hover:bg-gray-100 rounded-lg" 
+             onclick="setExample('Hey mom, I will be home late tonight. Don\\'t wait up for dinner.')">
+          <span class="block text-xs font-bold uppercase text-indigo-500 mb-1">Legitimate</span>
+          Hey mom, I will be home late tonight. Don't wait up for dinner.
+        </div>
+        <div class="example cursor-pointer p-4 bg-gray-50 hover:bg-gray-100 rounded-lg" 
+             onclick="setExample('URGENT! Your bank account will be suspended. Verify your details immediately at www.fake-bank.com')">
+          <span class="block text-xs font-bold uppercase text-indigo-500 mb-1">Likely Spam</span>
+          URGENT! Your bank account will be suspended. Verify your details immediately at www.fake-bank.com
+        </div>
+        <div class="example cursor-pointer p-4 bg-gray-50 hover:bg-gray-100 rounded-lg" 
+             onclick="setExample('Meeting rescheduled to 3pm tomorrow. Conference room B.')">
+          <span class="block text-xs font-bold uppercase text-indigo-500 mb-1">Legitimate</span>
+          Meeting rescheduled to 3pm tomorrow. Conference room B.
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const messageInput = document.getElementById('messageInput');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const result = document.getElementById('result');
+    const loading = document.getElementById('loading');
+
+    function setExample(text) {
+      messageInput.value = text;
+      messageInput.focus();
+    }
+
+    function showLoading() {
+      loading.classList.remove('hidden');
+      result.classList.add('hidden');
+      analyzeBtn.disabled = true;
+    }
+
+    function hideLoading() {
+      loading.classList.add('hidden');
+      analyzeBtn.disabled = false;
+    }
+
+    function showResult(data) {
+      result.classList.remove('hidden');
+      result.className = "mt-6 p-4 rounded-xl font-semibold text-center";
+
+      if (data.success) {
+        if (data.is_spam) {
+          result.classList.add("bg-red-100","text-red-700","border","border-red-300");
+          result.innerHTML = `
+            🚨 <strong>SPAM DETECTED</strong><br>
+            <span class="text-sm block mt-2">Confidence: ${(data.confidence * 100).toFixed(1)}%</span>
+            <span class="text-sm">Spam probability: ${(data.probabilities.spam * 100).toFixed(1)}%</span>`;
+        } else {
+          result.classList.add("bg-green-100","text-green-700","border","border-green-300");
+          result.innerHTML = `
+            ✅ <strong>LEGITIMATE MESSAGE</strong><br>
+            <span class="text-sm block mt-2">Confidence: ${(data.confidence * 100).toFixed(1)}%</span>
+            <span class="text-sm">Ham probability: ${(data.probabilities.ham * 100).toFixed(1)}%</span>`;
         }
+      } else {
+        result.classList.add("bg-yellow-100","text-yellow-700","border","border-yellow-300");
+        result.innerHTML = `
+          ⚠️ <strong>ERROR</strong><br>
+          <span class="text-sm block mt-2">${data.error || 'Failed to analyze the message.'}</span>`;
+      }
+    }
 
-        function showLoading() {
-            loading.style.display = 'block';
-            result.style.display = 'none';
-            analyzeBtn.disabled = true;
-        }
+    analyzeBtn.addEventListener('click', async () => {
+      const message = messageInput.value.trim();
+      if (!message) return alert('Please enter a message to analyze.');
 
-        function hideLoading() {
-            loading.style.display = 'none';
-            analyzeBtn.disabled = false;
-        }
-
-        function showResult(data) {
-            result.style.display = 'block';
-            
-            if (data.success) {
-                if (data.is_spam) {
-                    result.className = 'result spam';
-                    result.innerHTML = `
-                        <div>🚨 <strong>SPAM DETECTED</strong></div>
-                        <div class="confidence">Confidence: ${(data.confidence * 100).toFixed(1)}%</div>
-                        <div class="confidence">Spam probability: ${(data.probabilities.spam * 100).toFixed(1)}%</div>
-                    `;
-                } else {
-                    result.className = 'result ham';
-                    result.innerHTML = `
-                        <div>✅ <strong>LEGITIMATE MESSAGE</strong></div>
-                        <div class="confidence">Confidence: ${(data.confidence * 100).toFixed(1)}%</div>
-                        <div class="confidence">Ham probability: ${(data.probabilities.ham * 100).toFixed(1)}%</div>
-                    `;
-                }
-            } else {
-                result.className = 'result error';
-                result.innerHTML = `
-                    <div>⚠️ <strong>ERROR</strong></div>
-                    <div class="confidence">${data.error || 'Failed to analyze the message. Please try again.'}</div>
-                `;
-            }
-        }
-
-        analyzeBtn.addEventListener('click', async () => {
-            const message = messageInput.value.trim();
-            
-            if (!message) {
-                alert('Please enter a message to analyze.');
-                return;
-            }
-            
-            showLoading();
-            
-            try {
-                const response = await fetch('/predict', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ message: message })
-                });
-                
-                const data = await response.json();
-                showResult(data);
-                
-            } catch (error) {
-                console.error('Error:', error);
-                showResult({
-                    success: false,
-                    error: 'Network error. Please check your connection and try again.'
-                });
-            } finally {
-                hideLoading();
-            }
+      showLoading();
+      try {
+        const res = await fetch('/predict', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({message})
         });
+        const data = await res.json();
+        showResult(data);
+      } catch {
+        showResult({success:false,error:"Network error. Try again."});
+      } finally {
+        hideLoading();
+      }
+    });
 
-        // Allow Enter key to submit (Ctrl+Enter for new line)
-        messageInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.ctrlKey) {
-                e.preventDefault();
-                analyzeBtn.click();
-            }
-        });
-    </script>
+    // Enter key submits
+    messageInput.addEventListener('keydown', e => {
+      if (e.key === "Enter" && !e.ctrlKey) {
+        e.preventDefault();
+        analyzeBtn.click();
+      }
+    });
+  </script>
 </body>
 </html>
