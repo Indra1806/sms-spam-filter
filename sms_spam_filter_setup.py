@@ -136,7 +136,9 @@ class SMSVectorizer:
     
     def fit_transform(self, texts):
         """Fit and transform in one step"""
-        return self.vectorizer.fit_transform(texts)
+        result = self.vectorizer.fit_transform(texts)
+        self.fitted = True  # <-- Fix: set fitted to True
+        return result
     
     def get_feature_names(self):
         """Get feature names"""
