@@ -1,0 +1,272 @@
+import pickle
+import numpy as np
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+import warnings
+warnings.filterwarnings('ignore')
+
+def load_preprocessor_and_vectorizer():
+    """Load the preprocessor and vectorizer"""
+    try:
+        with open('preprocessor.pkl', 'rb') as f:
+            preprocessor = pickle.load(f)
+        with open('vectorizer.pkl', 'rb') as f:
+            vectorizer = pickle.load(f)
+        return preprocessor, vectorizer
+    except FileNotFoundError as e:
+        print(f"Error: {e}")
+        print("Please run the preprocessor and vectorizer codes first.")
+        return None, None
+
+# Comprehensive SMS dataset for better model training
+comprehensive_sms_data = [
+    # Spam messages (more variety)
+    ("Win a £1000 cash prize! Text WIN to 12345 now!", "spam"),
+    ("URGENT! Your account will be suspended. Click link now!", "spam"),
+    ("FREE entry in 2 a weekly comp for a chance to win an iPhone", "spam"),
+    ("Congratulations! You've won a lottery of $50000", "spam"),
+    ("LIMITED TIME OFFER! Buy now and save 50%", "spam"),
+    ("WINNER! As a valued network customer you have been selected", "spam"),
+    ("Free entry in 2 a wkly comp to win FA Cup final tkts", "spam"),
+    ("URGENT! We've tried to contact u. This is our 2nd attempt", "spam"),
+    ("SIX chances to win CASH! From 100 to 20,000 pounds!", "spam"),
+    ("PRIVATE! Your 2003 Account Statement shows 800 points", "spam"),
+    ("You have won a Nokia 7250i. To claim call now!", "spam"),
+    ("Claim your free mobile phone camera worth £100", "spam"),
+    ("Get a FREE camera phone + 1000 free texts", "spam"),
+    ("XXXMobileMovieClub: To use your credit click the WAP link", "spam"),
+    ("CALL FREE 08707509020 to claim 3hrs chit-chat", "spam"),
+    ("Txt JOKE to 80878 for adult jokes! Cost 25p per msg", "spam"),
+    ("STOP! Win a holiday to Euro 2004! Txt EURO to 80077", "spam"),
+    ("WIN cash prizes up to £5000! Just call 09061743806", "spam"),
+    ("Congratulations ur awarded 500 of CD vouchers", "spam"),
+    ("GUARANTEED LOAN approval! Bad credit OK! Call now", "spam"),
+    ("You are chosen to receive $1000 cash or $2000 gift card", "spam"),
+    ("Act now! Don't miss this limited time offer!", "spam"),
+    ("Your mobile number won our monthly draw! Claim prize", "spam"),
+    ("Discount pharmacy! Viagra, Cialis at lowest prices", "spam"),
+    ("Make money from home! $5000/week guaranteed!", "spam"),
+    
+    # Ham messages (more variety)
+    ("Hey, are we still meeting for dinner tonight?", "ham"),
+    ("Thanks for the birthday wishes!", "ham"),
+    ("I'll pick you up at 7pm", "ham"),
+    ("Can you send me the report?", "ham"),
+    ("See you tomorrow at the office", "ham"),
+    ("Good morning! How was your weekend?", "ham"),
+    ("Don't forget we have a meeting at 3pm", "ham"),
+    ("Could you please review this document?", "ham"),
+    ("Happy anniversary! Hope you have a great day", "ham"),
+    ("Let me know when you're free to talk", "ham"),
+    ("The weather is really nice today", "ham"),
+    ("I'm running a bit late, be there in 10 minutes", "ham"),
+    ("Thanks for your help with the project", "ham"),
+    ("Did you watch the game last night?", "ham"),
+    ("Looking forward to seeing you soon", "ham"),
+    ("Please call me when you get this message", "ham"),
+    ("Great job on the presentation!", "ham"),
+    ("What time does the store close?", "ham"),
+    ("I'll send you the details by email", "ham"),
+    ("Have a safe trip!", "ham"),
+    ("Mom, I'll be home for dinner", "ham"),
+    ("Can you pick up some milk on your way home?", "ham"),
+    ("The meeting has been moved to tomorrow", "ham"),
+    ("Your order is ready for pickup", "ham"),
+    ("Reminder: Doctor appointment at 2pm", "ham"),
+    ("Flight delayed by 30 minutes", "ham"),
+    ("Happy birthday! Hope you have a wonderful day", "ham"),
+    ("Thanks for the lunch recommendation", "ham"),
+    ("I lost my keys, can you let me in?", "ham"),
+    ("The movie starts at 8pm", "ham"),
+    ("Congratulations on your promotion!", "ham"),
+    ("Can we reschedule our meeting?", "ham"),
+    ("I'll be working from home today", "ham"),
+    ("The package was delivered successfully", "ham"),
+    ("Don't forget to bring the documents", "ham")
+]
+
+class SMSSpamModel:
+    def __init__(self, model_type='naive_bayes'):
+        """Initialize the SMS spam model"""
+        self.model_type = model_type
+        
+        if model_type == 'naive_bayes':
+            self.model = MultinomialNB(alpha=1.0)
+        elif model_type == 'random_forest':
+            self.model = RandomForestClassifier(
+                n_estimators=100, 
+                random_state=42,
+                max_depth=10,
+                min_samples_split=5
+            )
+        elif model_type == 'logistic_regression':
+            self.model = LogisticRegression(
+                random_state=42,
+                max_iter=1000,
+                C=1.0
+            )
+        elif model_type == 'svm':
+            self.model = SVC(
+                kernel='rbf',
+                probability=True,
+                random_state=42,
+                C=1.0
+            )
+        else:
+            raise ValueError("Unsupported model type")
+        
+        self.fitted = False
+    
+    def fit(self, X_train, y_train):
+        """Train the model"""
+        self.model.fit(X_train, y_train)
+        self.fitted = True
+        return self
+    
+    def predict(self, X):
+        """Make predictions"""
+        if not self.fitted:
+            raise ValueError("Model must be fitted first!")
+        return self.model.predict(X)
+    
+    def predict_proba(self, X):
+        """Get prediction probabilities"""
+        if not self.fitted:
+            raise ValueError("Model must be fitted first!")
+        return self.model.predict_proba(X)
+    
+    def score(self, X, y):
+        """Get model score"""
+        return self.model.score(X, y)
+
+def train_and_evaluate_models():
+    """Train multiple models and select the best one"""
+    
+    # Load preprocessor and vectorizer
+    preprocessor, vectorizer = load_preprocessor_and_vectorizer()
+    
+    if preprocessor is None or vectorizer is None:
+        return None
+    
+    # Prepare data
+    texts = [sms[0] for sms in comprehensive_sms_data]
+    labels = [sms[1] for sms in comprehensive_sms_data]
+    
+    # Preprocess and vectorize
+    cleaned_texts = preprocessor.transform(texts)
+    X = vectorizer.transform(cleaned_texts)
+    y = preprocessor.label_encoder.transform(labels)
+    
+    # Split data
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
+    )
+    
+    # Train different models
+    models = {
+        'Naive Bayes': SMSSpamModel('naive_bayes'),
+        'Random Forest': SMSSpamModel('random_forest'),
+        'Logistic Regression': SMSSpamModel('logistic_regression')
+    }
+    
+    best_model = None
+    best_score = 0
+    best_name = ""
+    
+    print("Training and evaluating models...")
+    print("=" * 50)
+    
+    for name, model in models.items():
+        print(f"\nTraining {name}...")
+        
+        # Train model
+        model.fit(X_train, y_train)
+        
+        # Cross-validation score
+        cv_scores = cross_val_score(model.model, X_train, y_train, cv=5)
+        
+        # Test score
+        test_score = model.score(X_test, y_test)
+        
+        print(f"CV Score: {cv_scores.mean():.4f} (±{cv_scores.std() * 2:.4f})")
+        print(f"Test Score: {test_score:.4f}")
+        
+        # Predictions for detailed evaluation
+        y_pred = model.predict(X_test)
+        
+        # Convert back to original labels for readable output
+        y_test_labels = preprocessor.label_encoder.inverse_transform(y_test)
+        y_pred_labels = preprocessor.label_encoder.inverse_transform(y_pred)
+        
+        print(f"Classification Report for {name}:")
+        print(classification_report(y_test_labels, y_pred_labels))
+        
+        # Select best model
+        if test_score > best_score:
+            best_score = test_score
+            best_model = model
+            best_name = name
+    
+    print(f"\nBest Model: {best_name} (Score: {best_score:.4f})")
+    return best_model, best_name
+
+# Main execution
+if __name__ == "__main__":
+    print("SMS Spam Classification Model Training")
+    print("=" * 40)
+    
+    # Train and select best model
+    best_model, model_name = train_and_evaluate_models()
+    
+    if best_model is not None:
+        # Save the best model
+        with open('model.pkl', 'wb') as f:
+            pickle.dump(best_model, f)
+        
+        print(f"\n✓ Best model ({model_name}) saved to model.pkl")
+        
+        # Test the complete pipeline
+        print("\nTesting complete pipeline...")
+        
+        # Load all components
+        with open('preprocessor.pkl', 'rb') as f:
+            preprocessor = pickle.load(f)
+        with open('vectorizer.pkl', 'rb') as f:
+            vectorizer = pickle.load(f)
+        with open('model.pkl', 'rb') as f:
+            model = pickle.load(f)
+        
+        # Test messages
+        test_messages = [
+            "Congratulations! You won $1000! Click here to claim now!",
+            "Hey, can you pick me up at 6pm?",
+            "FREE iPhone! Limited time offer! Call now!",
+            "Meeting moved to 3pm tomorrow"
+        ]
+        
+        print("\nPrediction Results:")
+        print("-" * 30)
+        
+        for msg in test_messages:
+            # Process message
+            cleaned = preprocessor.transform([msg])
+            vectorized = vectorizer.transform(cleaned)
+            
+            # Predict
+            prediction = model.predict(vectorized)[0]
+            probabilities = model.predict_proba(vectorized)[0]
+            
+            # Convert prediction back to label
+            pred_label = preprocessor.label_encoder.inverse_transform([prediction])[0]
+            confidence = max(probabilities)
+            
+            print(f"Message: '{msg[:50]}{'...' if len(msg) > 50 else ''}'")
+            print(f"Prediction: {pred_label.upper()} (Confidence: {confidence:.4f})")
+            print()
+    
+    else:
+        print("Failed to train model. Please check preprocessor and vectorizer files.")

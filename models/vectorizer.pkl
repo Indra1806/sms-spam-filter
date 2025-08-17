@@ -1,0 +1,137 @@
+import pickle
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+
+# Load preprocessor to get cleaned texts
+def load_preprocessor():
+    try:
+        with open('preprocessor.pkl', 'rb') as f:
+            return pickle.load(f)
+    except FileNotFoundError:
+        print("Error: preprocessor.pkl not found. Run the preprocessor code first.")
+        return None
+
+class SMSVectorizer:
+    def __init__(self, max_features=5000, ngram_range=(1, 2)):
+        self.vectorizer = TfidfVectorizer(
+            max_features=max_features,
+            ngram_range=ngram_range,
+            min_df=2,
+            max_df=0.95,
+            stop_words=None,  # We already removed stopwords in preprocessing
+            lowercase=False,  # Already lowercased in preprocessing
+            token_pattern=r'\b\w+\b'
+        )
+        self.fitted = False
+    
+    def fit(self, texts):
+        """Fit the vectorizer"""
+        self.vectorizer.fit(texts)
+        self.fitted = True
+        return self
+    
+    def transform(self, texts):
+        """Transform texts to vectors"""
+        if not self.fitted:
+            raise ValueError("Vectorizer must be fitted first!")
+        return self.vectorizer.transform(texts)
+    
+    def fit_transform(self, texts):
+        """Fit and transform in one step"""
+        return self.vectorizer.fit_transform(texts)
+    
+    def get_feature_names(self):
+        """Get feature names"""
+        return self.vectorizer.get_feature_names_out()
+
+# Extended SMS dataset for better training
+extended_sms_data = [
+    # Spam messages
+    ("Win a £1000 cash prize! Text WIN to 12345 now!", "spam"),
+    ("URGENT! Your account will be suspended. Click link now!", "spam"),
+    ("FREE entry in 2 a weekly comp for a chance to win an iPhone", "spam"),
+    ("Congratulations! You've won a lottery of $50000", "spam"),
+    ("LIMITED TIME OFFER! Buy now and save 50%", "spam"),
+    ("WINNER! As a valued network customer you have been selected to receive a £900 prize reward!", "spam"),
+    ("Free entry in 2 a wkly comp to win FA Cup final tkts 21st May 2005", "spam"),
+    ("URGENT! We've tried to contact u. This is our 2nd attempt", "spam"),
+    ("SIX chances to win CASH! From 100 to 20,000 pounds!", "spam"),
+    ("PRIVATE! Your 2003 Account Statement for 07808 shows 800 un-redeemed S.I.M. points", "spam"),
+    ("You have won a Nokia 7250i. To claim call now!", "spam"),
+    ("Claim your free mobile phone camera worth £100", "spam"),
+    ("Get a FREE camera phone + 1000 free texts", "spam"),
+    ("XXXMobileMovieClub: To use your credit click the WAP link", "spam"),
+    ("CALL FREE 08707509020 to claim 3hrs chit-chat", "spam"),
+    
+    # Ham messages  
+    ("Hey, are we still meeting for dinner tonight?", "ham"),
+    ("Thanks for the birthday wishes!", "ham"),
+    ("I'll pick you up at 7pm", "ham"),
+    ("Can you send me the report?", "ham"),
+    ("See you tomorrow at the office", "ham"),
+    ("Good morning! How was your weekend?", "ham"),
+    ("Don't forget we have a meeting at 3pm", "ham"),
+    ("Could you please review this document?", "ham"),
+    ("Happy anniversary! Hope you have a great day", "ham"),
+    ("Let me know when you're free to talk", "ham"),
+    ("The weather is really nice today", "ham"),
+    ("I'm running a bit late, be there in 10 minutes", "ham"),
+    ("Thanks for your help with the project", "ham"),
+    ("Did you watch the game last night?", "ham"),
+    ("Looking forward to seeing you soon", "ham"),
+    ("Please call me when you get this message", "ham"),
+    ("Great job on the presentation!", "ham"),
+    ("What time does the store close?", "ham"),
+    ("I'll send you the details by email", "ham"),
+    ("Have a safe trip!", "ham")
+]
+
+# Create and save vectorizer
+if __name__ == "__main__":
+    # Load preprocessor
+    preprocessor = load_preprocessor()
+    
+    if preprocessor is None:
+        print("Please run the preprocessor code first to generate preprocessor.pkl")
+        exit()
+    
+    # Prepare data
+    texts = [sms[0] for sms in extended_sms_data]
+    labels = [sms[1] for sms in extended_sms_data]
+    
+    # Clean texts using preprocessor
+    cleaned_texts = preprocessor.transform(texts)
+    
+    # Split data for training
+    X_train, X_test, y_train, y_test = train_test_split(
+        cleaned_texts, labels, test_size=0.2, random_state=42, stratify=labels
+    )
+    
+    # Create and fit vectorizer
+    sms_vectorizer = SMSVectorizer(max_features=3000, ngram_range=(1, 2))
+    
+    # Fit on training data
+    X_train_vectorized = sms_vectorizer.fit_transform(X_train)
+    
+    # Save vectorizer
+    with open('vectorizer.pkl', 'wb') as f:
+        pickle.dump(sms_vectorizer, f)
+    
+    print("✓ SMS Vectorizer saved to vectorizer.pkl")
+    print(f"Vocabulary size: {len(sms_vectorizer.get_feature_names())}")
+    print(f"Training data shape: {X_train_vectorized.shape}")
+    
+    # Test vectorizer
+    X_test_vectorized = sms_vectorizer.transform(X_test)
+    print(f"Test data shape: {X_test_vectorized.shape}")
+    
+    # Show some feature examples
+    feature_names = sms_vectorizer.get_feature_names()
+    print(f"\nSample features: {list(feature_names[:20])}")
+    
+    # Test with a sample message
+    test_message = ["free win cash prize click now"]
+    test_vectorized = sms_vectorizer.transform(test_message)
+    print(f"\nTest message vectorized shape: {test_vectorized.shape}")
+    print(f"Non-zero features: {test_vectorized.nnz}")

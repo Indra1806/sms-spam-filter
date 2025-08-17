@@ -1,0 +1,119 @@
+import pickle
+import re
+import string
+import nltk
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+from sklearn.preprocessing import LabelEncoder
+
+# Download required NLTK data
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt')
+
+try:
+    nltk.data.find('corpora/stopwords')
+except LookupError:
+    nltk.download('stopwords')
+
+class SMSPreprocessor:
+    def __init__(self):
+        self.label_encoder = LabelEncoder()
+        self.stemmer = PorterStemmer()
+        self.stop_words = set(stopwords.words('english'))
+        self.fitted = False
+    
+    def clean_text(self, text):
+        """Clean and preprocess SMS text"""
+        # Convert to lowercase
+        text = text.lower()
+        
+        # Remove URLs
+        text = re.sub(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', '', text)
+        
+        # Remove phone numbers
+        text = re.sub(r'\b\d{10,}\b', '', text)
+        text = re.sub(r'\b\d{3}-\d{3}-\d{4}\b', '', text)
+        
+        # Remove extra spaces and newlines
+        text = re.sub(r'\s+', ' ', text)
+        
+        # Remove punctuation
+        text = text.translate(str.maketrans('', '', string.punctuation))
+        
+        # Remove numbers
+        text = re.sub(r'\d+', '', text)
+        
+        # Tokenize and remove stopwords
+        words = text.split()
+        words = [word for word in words if word not in self.stop_words and len(word) > 2]
+        
+        # Stem words
+        words = [self.stemmer.stem(word) for word in words]
+        
+        return ' '.join(words)
+    
+    def fit(self, texts, labels):
+        """Fit the preprocessor"""
+        # Fit label encoder
+        self.label_encoder.fit(labels)
+        self.fitted = True
+        return self
+    
+    def transform(self, texts, labels=None):
+        """Transform texts and optionally labels"""
+        if not self.fitted and labels is not None:
+            raise ValueError("Preprocessor must be fitted first!")
+        
+        # Clean texts
+        cleaned_texts = [self.clean_text(text) for text in texts]
+        
+        if labels is not None:
+            encoded_labels = self.label_encoder.transform(labels)
+            return cleaned_texts, encoded_labels
+        
+        return cleaned_texts
+    
+    def fit_transform(self, texts, labels):
+        """Fit and transform in one step"""
+        return self.fit(texts, labels).transform(texts, labels)
+
+# Sample SMS data for demonstration
+sample_sms_data = [
+    ("Win a £1000 cash prize! Text WIN to 12345 now!", "spam"),
+    ("Hey, are we still meeting for dinner tonight?", "ham"),
+    ("URGENT! Your account will be suspended. Click link now!", "spam"),
+    ("Thanks for the birthday wishes!", "ham"),
+    ("FREE entry in 2 a weekly comp for a chance to win an iPhone", "spam"),
+    ("I'll pick you up at 7pm", "ham"),
+    ("Congratulations! You've won a lottery of $50000", "spam"),
+    ("Can you send me the report?", "ham"),
+    ("LIMITED TIME OFFER! Buy now and save 50%", "spam"),
+    ("See you tomorrow at the office", "ham")
+]
+
+# Create and save preprocessor
+if __name__ == "__main__":
+    # Separate texts and labels
+    texts = [sms[0] for sms in sample_sms_data]
+    labels = [sms[1] for sms in sample_sms_data]
+    
+    # Create preprocessor
+    preprocessor = SMSPreprocessor()
+    
+    # Fit the preprocessor
+    cleaned_texts, encoded_labels = preprocessor.fit_transform(texts, labels)
+    
+    # Save preprocessor
+    with open('preprocessor.pkl', 'wb') as f:
+        pickle.dump(preprocessor, f)
+    
+    print("✓ SMS Preprocessor saved to preprocessor.pkl")
+    print(f"Label mapping: {dict(zip(preprocessor.label_encoder.classes_, preprocessor.label_encoder.transform(preprocessor.label_encoder.classes_)))}")
+    
+    # Test the preprocessor
+    test_text = "FREE! Win iPhone now! Click here!!!"
+    cleaned = preprocessor.clean_text(test_text)
+    print(f"\nOriginal: {test_text}")
+    print(f"Cleaned: {cleaned}")
