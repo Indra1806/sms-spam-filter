@@ -1,7 +1,6 @@
 # src/predictor.py
 import joblib
 import logging
-import pickle
 from typing import Union, List, Dict
 
 logger = logging.getLogger(__name__)

@@ -63,6 +63,11 @@ extended_sms_data = [
     ("Get a FREE camera phone + 1000 free texts", "spam"),
     ("XXXMobileMovieClub: To use your credit click the WAP link", "spam"),
     ("CALL FREE 08707509020 to claim 3hrs chit-chat", "spam"),
+    ("Txt JOKE to 80878 for adult jokes! Cost 25p per msg", "spam"),
+    ("STOP! Win a holiday to Euro 2004! Txt EURO to 80077", "spam"),
+    ("WIN cash prizes up to £5000! Just call 09061743806", "spam"),
+    ("Congratulations ur awarded 500 of CD vouchers", "spam"),
+    ("GUARANTEED LOAN approval! Bad credit OK! Call now", "spam"),
     
     # Ham messages  
     ("Hey, are we still meeting for dinner tonight?", "ham"),
@@ -84,7 +89,12 @@ extended_sms_data = [
     ("Great job on the presentation!", "ham"),
     ("What time does the store close?", "ham"),
     ("I'll send you the details by email", "ham"),
-    ("Have a safe trip!", "ham")
+    ("Have a safe trip!", "ham"),
+    ("Mom, I'll be home for dinner", "ham"),
+    ("Can you pick up some milk on your way home?", "ham"),
+    ("The meeting has been moved to tomorrow", "ham"),
+    ("Your order is ready for pickup", "ham"),
+    ("Reminder: Doctor appointment at 2pm", "ham")
 ]
 
 # Create and save vectorizer

@@ -4,7 +4,7 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
-from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
+from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
 import warnings
 warnings.filterwarnings('ignore')
@@ -24,7 +24,7 @@ def load_preprocessor_and_vectorizer():
 
 # Comprehensive SMS dataset for better model training
 comprehensive_sms_data = [
-    # Spam messages (more variety)
+    # Spam messages
     ("Win a £1000 cash prize! Text WIN to 12345 now!", "spam"),
     ("URGENT! Your account will be suspended. Click link now!", "spam"),
     ("FREE entry in 2 a weekly comp for a chance to win an iPhone", "spam"),
@@ -51,7 +51,7 @@ comprehensive_sms_data = [
     ("Discount pharmacy! Viagra, Cialis at lowest prices", "spam"),
     ("Make money from home! $5000/week guaranteed!", "spam"),
     
-    # Ham messages (more variety)
+    # Ham messages
     ("Hey, are we still meeting for dinner tonight?", "ham"),
     ("Thanks for the birthday wishes!", "ham"),
     ("I'll pick you up at 7pm", "ham"),
@@ -150,7 +150,7 @@ def train_and_evaluate_models():
     preprocessor, vectorizer = load_preprocessor_and_vectorizer()
     
     if preprocessor is None or vectorizer is None:
-        return None
+        return None, None
     
     # Prepare data
     texts = [sms[0] for sms in comprehensive_sms_data]

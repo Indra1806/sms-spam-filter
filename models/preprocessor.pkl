@@ -26,8 +26,11 @@ class SMSPreprocessor:
     
     def clean_text(self, text):
         """Clean and preprocess SMS text"""
-        # Convert to lowercase
-        text = text.lower()
+        if text is None or text == "":
+            return ""
+        
+        # Convert to string and lowercase
+        text = str(text).lower()
         
         # Remove URLs
         text = re.sub(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', '', text)
@@ -56,7 +59,6 @@ class SMSPreprocessor:
     
     def fit(self, texts, labels):
         """Fit the preprocessor"""
-        # Fit label encoder
         self.label_encoder.fit(labels)
         self.fitted = True
         return self
@@ -90,7 +92,13 @@ sample_sms_data = [
     ("Congratulations! You've won a lottery of $50000", "spam"),
     ("Can you send me the report?", "ham"),
     ("LIMITED TIME OFFER! Buy now and save 50%", "spam"),
-    ("See you tomorrow at the office", "ham")
+    ("See you tomorrow at the office", "ham"),
+    ("WINNER! As a valued network customer you have been selected", "spam"),
+    ("Good morning! How was your weekend?", "ham"),
+    ("Free entry in 2 a wkly comp to win FA Cup final tkts", "spam"),
+    ("Don't forget we have a meeting at 3pm", "ham"),
+    ("URGENT! We've tried to contact u. This is our 2nd attempt", "spam"),
+    ("Could you please review this document?", "ham")
 ]
 
 # Create and save preprocessor
