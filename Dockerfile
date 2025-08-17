@@ -4,24 +4,27 @@ FROM python:3.9-slim
 # Set working directory inside the container
 WORKDIR /app
 
-# Install system dependencies for packages like scikit-learn
+# Install system dependencies required by scikit-learn and other packages
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
     curl \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy and install Python dependencies
+# Copy requirements first for better caching
 COPY requirements.txt .
+
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Download required NLTK data
 RUN python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
 
-# Copy the entire project into the container
+# Copy the rest of the application code
 COPY . .
 
-# Create necessary folders
+# Create necessary directories
 RUN mkdir -p models results logs
 
 # Expose Flask port
